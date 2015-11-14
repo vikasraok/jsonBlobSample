@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">RazorPaySample</string>
+    <string name="action_settings">Settings</string>
+    <string name="json_url">https://jsonblob.com/api/jsonBlob/</string>
+    <string name="blob_id">5645dd62e4b01190df3fcce6</string>
+</resources>
