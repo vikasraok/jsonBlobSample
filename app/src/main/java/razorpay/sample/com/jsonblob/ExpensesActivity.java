@@ -8,13 +8,12 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
+import razorpay.sample.com.jsonblob.model.ExpensesModel;
 import razorpay.sample.com.jsonblob.util.DataReceiver;
 import razorpay.sample.com.jsonblob.util.PollService;
 
@@ -25,6 +24,8 @@ public class ExpensesActivity extends AppCompatActivity {
     private Timer timer;
     private TimerTask timerTask;
     final Handler handler = new Handler();
+    private ExpensesModel mData;
+    private String jsonResponse;
 
 
     @Override
@@ -33,7 +34,6 @@ public class ExpensesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_expenses);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,6 +54,18 @@ public class ExpensesActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        jsonResponse = savedInstanceState.getString("list_data",null);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("list_data",jsonResponse);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         //callback function upon receiving response
@@ -61,13 +73,13 @@ public class ExpensesActivity extends AppCompatActivity {
             @Override
             public void onReceiveResult(int resultCode, Bundle resultData) {
                 if (resultCode == RESULT_OK) {
-                    String resultValue = resultData.getString("response");
-                    Log.d(TAG,"response received");
+                    jsonResponse = resultData.getString("response");
+                    Log.d(TAG, "response received");
                 }
             }
         });
         startTimer();
-        timer.schedule(timerTask,100,30*1000);
+        timer.schedule(timerTask, 100, 30 * 1000);
     }
 
     public void startTimer() {
@@ -97,24 +109,5 @@ public class ExpensesActivity extends AppCompatActivity {
                 });
             }
         };
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_expenses, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }
