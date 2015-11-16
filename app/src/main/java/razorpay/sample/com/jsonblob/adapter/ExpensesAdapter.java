@@ -36,9 +36,9 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesHolder> {
         holder.tvAmount.setText(data.get(position).getAmount());
         holder.tvDate.setText(data.get(position).getDate());
         holder.tvTime.setText(data.get(position).getTime());
-        if (data.get(position).getState() == "unverified")
+        if (data.get(position).getState().equals("unverified"))
             holder.rgState.check(R.id.rb_unverified);
-        else if (data.get(position).getState() == "verified")
+        else if (data.get(position).getState().equals("verified"))
             holder.rgState.check(R.id.rb_verified);
         else
             holder.rgState.check(R.id.rb_fraud);

@@ -22,5 +22,6 @@ public class ExpensesHolder extends RecyclerView.ViewHolder {
         tvAmount = (TextView) itemView.findViewById(R.id.tv_expense_amount);
         tvTime = (TextView) itemView.findViewById(R.id.tv_expense_time);
         tvDate = (TextView) itemView.findViewById(R.id.tv_expense_date);
+        rgState = (RadioGroup) itemView.findViewById(R.id.rg_state);
     }
 }
