@@ -9,10 +9,10 @@ import android.support.v4.os.ResultReceiver;
  * Created by SESA249903 on 11/14/2015.
  */
 @SuppressLint("ParcelCreator")
-public class DataReceiver extends ResultReceiver {
+public class DataBridge extends ResultReceiver {
     private Receiver receiver;
 
-    public DataReceiver(Handler handler) {
+    public DataBridge(Handler handler) {
         super(handler);
     }
 

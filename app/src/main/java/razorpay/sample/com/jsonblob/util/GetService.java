@@ -21,17 +21,14 @@ import org.json.JSONObject;
 
 import razorpay.sample.com.jsonblob.R;
 
-/**
- * Created by SESA249903 on 11/14/2015.
- */
-public class PollService extends IntentService {
+public class GetService extends IntentService {
 
     private RequestQueue mQueue;
     private Context mContent;
-    public static final String TAG = PollService.class.getSimpleName();
+    public static final String TAG = GetService.class.getSimpleName();
 
-    public PollService() {
-        super("PollService");
+    public GetService() {
+        super("GetService");
     }
 
     private RequestQueue getRequestQueue() {

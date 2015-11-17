@@ -1,57 +1,60 @@
 package razorpay.sample.com.jsonblob.model;
 
-/**
- * Created by SESA249903 on 11/14/2015.
- */
+
 public class ExpensesModel {
 
-    String expenseDecription, expenseCategory, expenseAmount, expenseDate, expenseTime, expenseState;
+    int amount;
+    String category;
+    String time;
+    String description;
+    String id;
+    String state;
 
     public void setDescription(String str) {
-        expenseDecription = str;
+        description = str;
     }
 
     public void setCategory(String str) {
-        expenseCategory = str;
+        this.category = str;
     }
 
-    public void setAmount(String str) {
-        expenseAmount = str;
+    public void setAmount(int amount) {
+        this.amount = amount;
     }
 
-    public void setDate(String str) {
-        expenseDate = str;
-    }
 
     public void setTime(String str) {
-        expenseTime = str;
+        this.time = str;
     }
 
     public void setState(String str) {
-        expenseState = str.toLowerCase();
+        this.state = str.toLowerCase();
     }
 
     public String getDescription() {
-        return expenseDecription;
+        return description;
     }
 
     public String getCategory() {
-        return expenseCategory;
+        return category;
     }
 
     public String getAmount() {
-        return expenseAmount;
+        return String.valueOf(amount);
     }
 
     public String getDate() {
-        return expenseDate;
+        return time.substring(0, time.indexOf("T"));
     }
 
     public String getTime() {
-        return expenseTime;
+        return time.substring(time.indexOf("T") + 1, time.indexOf("."));
     }
 
     public String getState() {
-        return expenseState;
+        return state;
     }
+     public String getId() {
+         return id;
+     }
 }

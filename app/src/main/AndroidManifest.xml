@@ -19,7 +19,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name="razorpay.sample.com.jsonblob.util.PollService"
+            android:name="razorpay.sample.com.jsonblob.util.GetService"
             android:exported="false"/>
     </application>
 

@@ -1,5 +1,6 @@
 package razorpay.sample.com.jsonblob;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,8 +13,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -21,14 +22,15 @@ import java.util.TimerTask;
 
 import razorpay.sample.com.jsonblob.adapter.ExpensesAdapter;
 import razorpay.sample.com.jsonblob.model.ExpensesModel;
-import razorpay.sample.com.jsonblob.util.DataReceiver;
-import razorpay.sample.com.jsonblob.util.PollService;
+import razorpay.sample.com.jsonblob.util.DataBridge;
+import razorpay.sample.com.jsonblob.util.GetService;
 
 public class ExpensesActivity extends AppCompatActivity {
 
     private String TAG = ExpensesActivity.class.getSimpleName();
-    public DataReceiver mReceiver;
+    public DataBridge getBridge, putBridge;
     private Timer timer;
+    private ProgressDialog pDialog;
     private TimerTask timerTask;
     final Handler handler = new Handler();
     private ArrayList<ExpensesModel> mData;
@@ -52,25 +54,28 @@ public class ExpensesActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        mReceiver = new DataReceiver(new Handler());
+        getBridge = new DataBridge(new Handler());
+        putBridge = new DataBridge(new Handler());
         expenseList = (RecyclerView) findViewById(R.id.rv_expenses_list);
         expenseList.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ExpensesAdapter(mData);
-        expenseList.setAdapter(adapter);
+        adapter = new ExpensesAdapter(mData, getApplicationContext(), putBridge);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         //setting to null to handle memory leaks
-        mReceiver.setReceiver(null);
+        getBridge.setReceiver(null);
+        putBridge.setReceiver(null);
         stopTimer();
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        jsonResponse = savedInstanceState.getString("list_data", null);
+        jsonResponse = savedInstanceState.getString("list_data", "");
+        if (mData.size() == 0 && !jsonResponse.isEmpty())
+            createList(jsonResponse);
     }
 
     @Override
@@ -82,43 +87,36 @@ public class ExpensesActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (jsonResponse == null)
+            showDialog();
         //callback function upon receiving response
-        mReceiver.setReceiver(new DataReceiver.Receiver() {
+        getBridge.setReceiver(new DataBridge.Receiver() {
             @Override
             public void onReceiveResult(int resultCode, Bundle resultData) {
                 if (resultCode == RESULT_OK) {
-
-                    if (jsonResponse != resultData.getString("response")) {
+                    if (jsonResponse == null) {
                         jsonResponse = resultData.getString("response");
-                        addData(jsonResponse);
+                        createList(jsonResponse);
                     }
                     Log.d(TAG, "response received");
+                    hideDialog();
                 }
             }
         });
+        //start poll timer to pull data every 30 second after the 1/10th of a second
         startTimer();
         timer.schedule(timerTask, 100, 30 * 1000);
+        //callback function upon receiving response from
+
     }
 
-    private void addData(String jsonResponse) {
+    private void createList(String jsonResponse) {
         this.jsonResponse = jsonResponse;
-        try {
-            JSONArray expenseArray = new JSONArray(jsonResponse);
-            ExpensesModel model = new ExpensesModel();
-            for (int i = 0; i < expenseArray.length(); i++) {
-                model.setDescription(expenseArray.getJSONObject(i).getString("description"));
-                model.setAmount(String.valueOf(expenseArray.getJSONObject(i).getInt("amount")));
-                model.setCategory(expenseArray.getJSONObject(i).getString("category"));
-                String str = expenseArray.getJSONObject(i).getString("time");
-                model.setDate(str.substring(0, str.indexOf("T")));
-                model.setTime(str.substring(str.indexOf("T") + 1, str.indexOf(".")));
-                model.setState(expenseArray.getJSONObject(i).getString("state"));
-                mData.add(model);
-            }
-            adapter.notifyDataSetChanged();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        mData = new Gson().fromJson(jsonResponse, new TypeToken<ArrayList<ExpensesModel>>() {
+        }.getType());
+        adapter = new ExpensesAdapter(mData, getApplicationContext(), putBridge);
+        expenseList.setAdapter(adapter);
+
     }
 
     public void startTimer() {
@@ -140,13 +138,26 @@ public class ExpensesActivity extends AppCompatActivity {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Intent poll = new Intent(getApplicationContext(), PollService.class);
+                        Intent poll = new Intent(getApplicationContext(), GetService.class);
                         //sending callback function to service
-                        poll.putExtra("receiver", mReceiver);
+                        poll.putExtra("receiver", getBridge);
                         startService(poll);
                     }
                 });
             }
         };
+    }
+
+    public void showDialog() {
+        pDialog = new ProgressDialog(this);
+        pDialog.setMessage("Loading...");
+        pDialog.show();
+    }
+
+    public void hideDialog() {
+        if (pDialog != null) {
+            pDialog.dismiss();
+            pDialog = null;
+        }
     }
 }

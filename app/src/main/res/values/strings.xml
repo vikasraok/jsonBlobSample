@@ -6,4 +6,5 @@
     <string name="string_unverified">Unverified</string>
     <string name="string_verified">Verified</string>
     <string name="string_fraud">Fraud</string>
+    <string name="string_amount">Amount spent: %1$s \u20B9 </string>
 </resources>

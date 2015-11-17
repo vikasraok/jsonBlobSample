@@ -7,9 +7,6 @@ import android.widget.TextView;
 
 import razorpay.sample.com.jsonblob.R;
 
-/**
- * Created by SESA249903 on 11/15/2015.
- */
 public class ExpensesHolder extends RecyclerView.ViewHolder {
 
     public TextView tvExpenseDescription, tvCategory, tvAmount, tvTime, tvDate;
