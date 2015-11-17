@@ -75,7 +75,7 @@ public class PutService extends IntentService {
                     Log.d(TAG, error.toString());
                 }
             }) {
-
+                //volley doesn't have an inbuilt method to handle put requests
                 @Override
                 public byte[] getBody() {
                     if ((getMethod() == Method.PUT) && (param != null)) {

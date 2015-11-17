@@ -11,7 +11,7 @@ import android.support.v4.os.ResultReceiver;
 @SuppressLint("ParcelCreator")
 public class DataBridge extends ResultReceiver {
     private Receiver receiver;
-
+    //used to send data from the intent service to the calling activity
     public DataBridge(Handler handler) {
         super(handler);
     }

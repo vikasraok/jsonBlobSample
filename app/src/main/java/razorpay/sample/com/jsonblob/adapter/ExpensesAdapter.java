@@ -56,6 +56,10 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesHolder> {
             holder.rgState.check(R.id.rb_verified);
         else
             holder.rgState.check(R.id.rb_fraud);
+        //I could have used radio groups oncheckchangedlistener and I did but had issues
+        //when the view was scrolled and data was populated so used onclickedlistener
+        //for the child elements
+        //Then you would say there is no need for a compound button, yes
         holder.rgState.getChildAt(0).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,8 +90,10 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesHolder> {
     }
     private void showSnackBar() {
         final int paddingBottom = (int) (context.getResources().getDimension(R.dimen.snackbar_padding));
+        //adding padding to move the view up so as to not obustruct the last element
         view.setPadding(0, 0, 0, paddingBottom);
-        Snackbar.make(view, "Save transaction state", Snackbar.LENGTH_INDEFINITE)
+        //Wanted to use snackbar and it just looks cleaner
+        Snackbar.make(view, "Save transaction changes?", Snackbar.LENGTH_INDEFINITE)
                 .setAction("Save", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -105,6 +111,7 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesHolder> {
                         context.startService(updateData);
                     }
                 }).setCallback(new Snackbar.Callback() {
+            //need this information to block/unblock the update event
             @Override
             public void onShown(Snackbar snackbar) {
                 super.onShown(snackbar);
