@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -37,6 +36,7 @@ public class ExpensesActivity extends AppCompatActivity {
     private ExpensesAdapter adapter;
     private String jsonResponse;
     private RecyclerView expenseList;
+    private boolean dataManipulated = false;
 
 
     @Override
@@ -50,15 +50,14 @@ public class ExpensesActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+
             }
         });
         getBridge = new DataBridge(new Handler());
         putBridge = new DataBridge(new Handler());
         expenseList = (RecyclerView) findViewById(R.id.rv_expenses_list);
         expenseList.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ExpensesAdapter(mData, getApplicationContext(), putBridge);
+        adapter = new ExpensesAdapter(mData, ExpensesActivity.this, putBridge);
     }
 
     @Override
@@ -97,6 +96,10 @@ public class ExpensesActivity extends AppCompatActivity {
                     if (jsonResponse == null) {
                         jsonResponse = resultData.getString("response");
                         createList(jsonResponse);
+                    } else {
+                        jsonResponse = resultData.getString("response");
+                        if (!dataManipulated)
+                        updateData();
                     }
                     Log.d(TAG, "response received");
                     hideDialog();
@@ -107,14 +110,39 @@ public class ExpensesActivity extends AppCompatActivity {
         startTimer();
         timer.schedule(timerTask, 100, 30 * 1000);
         //callback function upon receiving response from
+        putBridge.setReceiver(new DataBridge.Receiver() {
+            @Override
+            public void onReceiveResult(int resultCode, Bundle resultData) {
+                if (resultCode == RESULT_OK) {
+                    jsonResponse = resultData.getString("response");
+                        updateData();
+                }
+                if (resultData == null) {
+                    if (resultCode == 1001)
+                        dataManipulated = true;
+                    if (resultCode == 1002)
+                        dataManipulated = false;
+
+                }
+            }
+        });
+    }
+
+    private void updateData() {
+        ArrayList<ExpensesModel> update = new Gson().fromJson(jsonResponse, new TypeToken<ArrayList<ExpensesModel>>() {
+        }.getType());
+        for(int i =0; i< update.size();i++){
+            mData.set(i,update.get(i));
+        }
+        adapter.notifyDataSetChanged();
+        //if the sizes are same and yet the objects different then the data has been updated
 
     }
 
     private void createList(String jsonResponse) {
-        this.jsonResponse = jsonResponse;
         mData = new Gson().fromJson(jsonResponse, new TypeToken<ArrayList<ExpensesModel>>() {
         }.getType());
-        adapter = new ExpensesAdapter(mData, getApplicationContext(), putBridge);
+        adapter = new ExpensesAdapter(mData, ExpensesActivity.this, putBridge);
         expenseList.setAdapter(adapter);
 
     }

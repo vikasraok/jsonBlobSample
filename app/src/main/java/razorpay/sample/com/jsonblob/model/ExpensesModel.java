@@ -28,7 +28,7 @@ public class ExpensesModel {
     }
 
     public void setState(String str) {
-        this.state = str.toLowerCase();
+        this.state = str;
     }
 
     public String getDescription() {
@@ -52,7 +52,7 @@ public class ExpensesModel {
     }
 
     public String getState() {
-        return state;
+        return state.toLowerCase();
     }
      public String getId() {
          return id;

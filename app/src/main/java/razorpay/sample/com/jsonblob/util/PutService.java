@@ -45,21 +45,25 @@ public class PutService extends IntentService {
         super.onCreate();
         mContent = getApplicationContext();
     }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         {
             Log.d(TAG, "Put service running");
             final ResultReceiver receiver = intent.getParcelableExtra("receiver");
-            final String param = intent.getParcelableExtra("json");
+
+            final String param = intent.getStringExtra("json");
+
             final Bundle bundle = new Bundle();
+
             String URL = mContent.getResources().getString(R.string.json_url) + mContent.getResources().getString(R.string.blob_id);
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.PUT, URL, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
-                    Log.d(TAG , response.toString());
+                    Log.d(TAG, response.toString());
                     try {
                         JSONArray expenseArray = response.getJSONArray("expenses");
-                        bundle.putString("response",expenseArray.toString());
+                        bundle.putString("response", expenseArray.toString());
                         receiver.send(Activity.RESULT_OK, bundle);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -68,10 +72,21 @@ public class PutService extends IntentService {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.d(TAG,error.toString());
+                    Log.d(TAG, error.toString());
                 }
-            });
+            }) {
+
+                @Override
+                public byte[] getBody() {
+                    if ((getMethod() == Method.PUT) && (param != null)) {
+                        return param.getBytes();  // Encoding required?????
+                    } else {
+                        return super.getBody();
+                    }
+                }
+            };
             getRequestQueue().add(request);
+
         }
 
     }

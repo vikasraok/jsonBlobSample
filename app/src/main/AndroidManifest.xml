@@ -21,6 +21,9 @@
         <service
             android:name="razorpay.sample.com.jsonblob.util.GetService"
             android:exported="false"/>
+        <service
+            android:name="razorpay.sample.com.jsonblob.util.PutService"
+            android:exported="false"/>
     </application>
 
 </manifest>

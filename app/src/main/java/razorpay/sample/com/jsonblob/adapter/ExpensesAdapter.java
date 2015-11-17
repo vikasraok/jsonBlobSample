@@ -7,11 +7,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RadioGroup;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
@@ -20,9 +20,9 @@ import razorpay.sample.com.jsonblob.R;
 import razorpay.sample.com.jsonblob.holder.ExpensesHolder;
 import razorpay.sample.com.jsonblob.model.ExpensesModel;
 import razorpay.sample.com.jsonblob.util.DataBridge;
-import razorpay.sample.com.jsonblob.util.GetService;
+import razorpay.sample.com.jsonblob.util.PutService;
 
-public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesHolder>{
+public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesHolder> {
 
     private ArrayList<ExpensesModel> data;
     private Context context;
@@ -50,40 +50,74 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesHolder>{
         holder.tvAmount.setText(context.getResources().getString(R.string.string_amount, data.get(position).getAmount()));
         holder.tvDate.setText(data.get(position).getDate());
         holder.tvTime.setText(data.get(position).getTime());
-        if (data.get(position).getState().toLowerCase().equals("unverified"))
+        if (data.get(position).getState().equals("unverified"))
             holder.rgState.check(R.id.rb_unverified);
-        else if (data.get(position).getState().toLowerCase().equals("verified"))
+        else if (data.get(position).getState().equals("verified"))
             holder.rgState.check(R.id.rb_verified);
         else
             holder.rgState.check(R.id.rb_fraud);
-        holder.rgState.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        holder.rgState.getChildAt(0).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if(checkedId == R.id.rb_unverified)
+            public void onClick(View v) {
+                if (v.getId() == R.id.rb_unverified) {
                     data.get(position).setState("Unverified");
-                else if(checkedId == R.id.rb_verified)
+                    showSnackBar();
+                }
+            }
+        });
+        holder.rgState.getChildAt(1).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (v.getId() == R.id.rb_verified) {
                     data.get(position).setState("Verified");
-                else
+                    showSnackBar();
+                }
+            }
+        });
+        holder.rgState.getChildAt(2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (v.getId() == R.id.rb_fraud) {
                     data.get(position).setState("Fraud");
-
-                Snackbar.make(view, "Save transaction state", Snackbar.LENGTH_INDEFINITE)
-                        .setAction("Save", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Gson gson = new Gson();
-                                JsonElement element = gson.toJsonTree(data, new TypeToken<ArrayList<ExpensesModel>>(){}.getType());
-                                JsonArray jsonArray = element.getAsJsonArray();
-                                Intent poll = new Intent(context, GetService.class);
-                                //sending callback function to service
-                                poll.putExtra("receiver", bridge);
-                                poll.putExtra("json",jsonArray.toString());
-                                context.startService(poll);
-                            }
-                        }).show();
+                    showSnackBar();
+                }
             }
         });
     }
+    private void showSnackBar() {
+        final int paddingBottom = (int) (context.getResources().getDimension(R.dimen.snackbar_padding));
+        view.setPadding(0, 0, 0, paddingBottom);
+        Snackbar.make(view, "Save transaction state", Snackbar.LENGTH_INDEFINITE)
+                .setAction("Save", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        view.setPadding(0,0,0,0);
+                        Gson gson = new Gson();
+                        JsonElement element = gson.toJsonTree(data, new TypeToken<ArrayList<ExpensesModel>>() {
+                        }.getType());
+                        JsonArray jsonArray = element.getAsJsonArray();
+                        JsonObject jsonObj = new JsonObject();
+                        jsonObj.add("expenses", jsonArray);
+                        Intent updateData = new Intent(context, PutService.class);
+                        //sending callback function to service
+                        updateData.putExtra("receiver", bridge);
+                        updateData.putExtra("json", jsonObj.toString());
+                        context.startService(updateData);
+                    }
+                }).setCallback(new Snackbar.Callback() {
+            @Override
+            public void onShown(Snackbar snackbar) {
+                super.onShown(snackbar);
+                bridge.send(1001,null);
+            }
 
+            @Override
+            public void onDismissed(Snackbar snackbar, int event) {
+                super.onDismissed(snackbar, event);
+                bridge.send(1002,null);
+            }
+        }).show();
+    }
     @Override
     public int getItemCount() {
         return data.size();
