@@ -2,9 +2,11 @@ package razorpay.sample.com.jsonblob;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -59,7 +61,13 @@ public class ExpensesActivity extends AppCompatActivity {
         putBridge = new DataBridge(new Handler());
         //setting recycler view
         expenseList = (RecyclerView) findViewById(R.id.rv_expenses_list);
-        expenseList.setLayoutManager(new LinearLayoutManager(this));
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            //two columns of the phone is in landscape mode
+            GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
+            expenseList.setLayoutManager(layoutManager);
+        } else
+        //single column if in portrait
+            expenseList.setLayoutManager(new LinearLayoutManager(this));
         //adapter is loaded with empty data here
         adapter = new ExpensesAdapter(mData, ExpensesActivity.this, putBridge);
     }
@@ -81,6 +89,10 @@ public class ExpensesActivity extends AppCompatActivity {
         jsonResponse = savedInstanceState.getString("list_data", "");
         if (mData.size() == 0 && !jsonResponse.isEmpty())
             createList(jsonResponse);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
+            expenseList.setLayoutManager(layoutManager);
+        }
     }
 
     @Override
