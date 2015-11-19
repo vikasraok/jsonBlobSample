@@ -12,18 +12,26 @@
             android:name=".ExpensesActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
+        <service
+            android:name=".util.GetService"
+            android:exported="false" />
+        <service
+            android:name=".util.PutService"
+            android:exported="false" />
+
+        <activity
+            android:name=".SplashActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_splash"
+            android:theme="@style/FullscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service
-            android:name="razorpay.sample.com.jsonblob.util.GetService"
-            android:exported="false"/>
-        <service
-            android:name="razorpay.sample.com.jsonblob.util.PutService"
-            android:exported="false"/>
     </application>
 
 </manifest>
